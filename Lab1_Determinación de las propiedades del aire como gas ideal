@@ -1,0 +1,103 @@
+clear
+clc
+%%Coeficientes de la serie de Taylor
+ao=3.635888502; 
+a1=-1.360125*10^-3;
+a2=3.81443*10^-6;
+a3=-3.02383*10^-9;
+a4=1.03878*10^-12;
+a5=-1.32878*10^-16;
+R=287;%%Constante general de los gases
+%%Valores de referencia
+Tref=298.15;
+Pref=100000;
+href=298570;
+sref=5699.2;
+%%Intervalo válido para las iteraciones
+Ta=200;
+Tb=2500;
+n=1; %%Contador
+
+%%Selección del caso a trabajar
+Op = {'Temperatura y Presión','Presión y entalpía','Temperatura y entropía','Entalpía y entropía'};
+[indx,tf] = listdlg('PromptString',{'Seleccione un caso en'...
+    'específico'},'SelectionMode','single','ListString',Op);
+
+%%Caso nº1 - Datos conocidos (Temperatura y Presión)
+if indx == 1
+    P = input('Ingrese el valor de presión: ');
+    T = input('Ingrese el valor de temperatura: ');
+    v = (R*T/P);
+    fun = @(t) R*(ao+a1*t+a2*t.^2+a3*t.^3+a4*t.^4+a5*t.^5);
+    h = href+integral(fun,Tref,T);
+    fun1 = @(t) R*((ao*t.^-1)+a1+a2*t+a3*t.^2+a4*t.^3+a5*t.^4);
+    s = sref+integral(fun1,Tref,T)-R*log(P/Pref);
+    
+    fprintf('El volumen específico es: %d \n',v)
+    fprintf('La entalpía es: %d \n',h)
+    fprintf('La entropía es: %d \n',s)
+    
+%%Caso nº2 - Datos conocidos (Presión y entalpía)
+elseif indx == 2
+    P = input('Ingrese el valor de presión: ');
+    h = input('Ingrese el valor de la entalpía: ');
+    iter = input('Ingrese el número máximo de iteraciones: ');
+    while n<= iter
+    syms t
+    T = (Ta+Tb)/2;
+    fun = @(t) R*(ao+a1*t+a2*t.^2+a3*t.^3+a4*t.^4+a5*t.^5);
+    hb = href + integral(fun,Tref,T);
+    c = hb - h;
+        if c >= 0 
+            Tb = T;
+        elseif c <= 0
+            Ta = T;
+        end
+    n=n+1;
+    end
+    v = (R*T/P);
+    fun1 = @(t) R*((ao*t.^-1)+a1+a2*t+a3*t.^2+a4*t.^3+a5*t.^4);
+    s = sref+integral(fun1,Tref,T)-R*log(P/Pref);
+    fprintf('El volumen específico es: %d \n',v)
+    fprintf('La temperatura es: %d \n',T)
+    fprintf('La entropía es: %d \n',s)
+    
+%%Caso nº3 - Datos conocidos (Temperatura y entropía)
+elseif indx == 3
+    T = input('Ingrese el valor de temperatura: ');
+    s = input('Ingrese el valor de la entropía: ');
+    fun1 = @(t) R*((ao*t.^-1)+a1+a2*t+a3*t.^2+a4*t.^3+a5*t.^4);
+    P = Pref*exp((sref/R)+(1/R)*integral(fun1,Tref,T)-(s/R));
+    v = (R*T/P);
+    fun = @(t) R*(ao+a1*t+a2*t.^2+a3*t.^3+a4*t.^4+a5*t.^5);
+    h = href + integral(fun,Tref,T);
+    
+    fprintf('La entalpía es: %d \n',h)
+    fprintf('La presión es: %d \n',P)
+    fprintf('La volumen específico es: %d \n',v)
+
+%%Caso nº4 - Datos conocidos (Entalpía y entropía)
+elseif indx == 4
+    h = input('Ingrese el valor de la entalpía: ');
+    s = input('Ingrese el valor de la entropía: ');
+    iter = input('Ingrese el número máximo de iteraciones: ');
+    while n<= iter
+    syms t
+    T = (Ta+Tb)/2;
+    fun = @(t) R*(ao+a1*t+a2*t.^2+a3*t.^3+a4*t.^4+a5*t.^5);
+    hb = href + integral(fun,Tref,T);
+    c = hb - h;
+        if c >= 0 
+            Tb = T;
+        elseif c <= 0
+            Ta = T;
+        end
+    n=n+1;
+    end
+    fun1 = @(t) R*((ao*t.^-1)+a1+a2*t+a3*t.^2+a4*t.^3+a5*t.^4);
+    P = Pref*exp((sref/R)+(1/R)*integral(fun1,Tref,T)-(s/R));
+    v = (R*T/P);
+    fprintf('La temperatura es: %d \n',T)
+    fprintf('La presión es: %d \n',P)
+    fprintf('La volumen específico es: %d \n',v)
+end
