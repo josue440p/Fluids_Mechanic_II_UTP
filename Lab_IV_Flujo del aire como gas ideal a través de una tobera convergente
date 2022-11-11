@@ -1,0 +1,117 @@
+clear
+clc
+%Laboratorio nº4
+
+%Coeficientes de la serie de Taylor
+ao=3.635888502; 
+a1=-1.360125*10^-3;
+a2=3.81443*10^-6;
+a3=-3.02383*10^-9;
+a4=1.03878*10^-12;
+a5=-1.32878*10^-16;
+
+R=287;%Constante general de los gases
+
+%%Valores de referencia
+Tref=298.15;
+Pref=100000;
+href=298570;
+sref=5699.2;
+
+%Intervalo válido para las iteraciones
+Ta=200;
+Tb=2500;
+n=1; %Contador
+
+To = input('Ingrese el valor de la temperatura de estancamiento: ');
+Po = input('Ingrese el valor de la presión de estancamiento: ');
+Pcp = input('Ingrese el valor de la contrapresión o presión del medio: ');
+
+%Cálculo del calor específico y la relación de calores respecto a la To
+cpo = R*(ao + a1*To + a2*To^2 + a3*To^3 + a4*To^4 + a5*To^5);
+ko = cpo/(cpo-R);
+
+%Cálculo de la temperatura y presión crítica
+Tc = To/(1+((ko-1)/2));
+Pc = Po/((1+((ko-1)/2))^(ko/(ko-1)));
+
+%Cálculo de la entropía y entalpía de estancamiento
+syms t
+fun1 = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+ho = href + (integral(fun1,Tref,To));
+fun2 = @(t) R*((ao*t.^-1)+(a1)+(a2*t)+(a3*t.^2)+(a4*t.^3)+(a5*t.^4));
+so = sref + (integral(fun2,Tref,To))- R*log(Po/Pref);
+
+%Cálculo de la presión local de salida
+if Pcp >= Pc
+    Ps = Pcp;
+elseif Pcp < Pc
+    Ps = Pc;
+end
+
+%Cálculo de la temperatura local de salida
+ss = so;
+iter = 100;
+
+    while n <= iter
+    syms t
+    Ts = (Ta+Tb)/2;
+    fun3 = @(t) R*((ao*t.^-1)+(a1)+(a2*t)+(a3*t.^2)+(a4*t.^3)+(a5*t.^4));
+    sb = sref + integral(fun3,Tref,Ts)-R*log(Ps/Pref);
+    c = sb - ss;
+        if c >= 0 
+            Tb = Ts;
+        elseif c < 0
+            Ta = Ts;
+        end
+    n=n+1;
+    end
+
+%Cálculo de la entalpía local de salida
+syms t
+fun4 = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+hs = href + (integral(fun4,Tref,Ts));
+
+%Cálculo de la densidad local de salida
+Rhos = Ps/(R*Ts);
+
+%Cálculo de la velocidad local de salida
+Vs = sqrt(2*(ho-hs));
+
+%Cálculo del número de Mach de salida
+cps = R*(ao + a1*Ts + a2*Ts^2 + a3*Ts^3 + a4*Ts^4 + a5*Ts^5);
+ks = cps/(cps-R);
+Mas = Vs/(sqrt(ks*R*Ts));
+
+%Cálculo de la razón de flujo másico entre el área local de salida
+mA = Rhos*Vs;
+
+A = [1,11];
+A(1,1) = round(ho,3);
+A(1,2) = round(so,3);
+A(1,3) = round(Tc,3);
+A(1,4) = round(Pc,3);
+A(1,5) = round(Ts,3);
+A(1,6) = round(Ps,3);
+A(1,7) = round(hs,3);
+A(1,8) = round(Rhos,3);
+A(1,9) = round(Vs,3);
+A(1,10) = round(Mas,3);
+A(1,11) = round(mA,3);
+
+%Impresión de resultados
+disp('RESULTADOS')
+fprintf('La entalpía de estancamiento es: %d \n',ho)
+fprintf('La entropía de estancamiento es: %d \n',so)
+fprintf('La temperatura crítica es: %d \n',Tc)
+fprintf('La presión crítica es: %d \n',Pc)
+fprintf('La temperatura local de salida es: %d \n',Ts)
+fprintf('La presión local de salida es: %d \n',Ps)
+fprintf('La entalpía local de salida es: %d \n',hs)
+fprintf('La densidad local de salida es: %d \n',Rhos)
+fprintf('La velocidad local de salida es: %d \n',Vs)
+fprintf('El número de Mach de salida es: %d \n',Mas)
+fprintf('La razón de flujo másico entre área es: %d \n',mA)
+
+
+
