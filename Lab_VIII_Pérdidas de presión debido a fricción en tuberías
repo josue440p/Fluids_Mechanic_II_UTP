@@ -1,0 +1,125 @@
+%% Sección 1
+clear
+clc
+%Laboratorio nº9 - Pérdidas debido a fricción en tuberías
+Rho = 997; %Densidad a 25ºC
+u = 0.00089; %Viscocidad dinámica
+g = 9.81; %Gravedad
+L = 1; %Región de estudio
+d = 0.003175; %Diámetro de la tubería
+n = 1; %Contador
+A = (pi/4)*(d^2); %Área
+%Cambio de altura
+z1 = input('Ingrese la altura de la columna 1: ')/100;
+z2 = input('Ingrese la altura de la columna 2: ')/100;
+z = z1 - z2;
+%Cambio de presión
+P = z*Rho*g;
+%Ingreso de las mediciones de tiempo
+T = [1,4];
+while n <= 4
+    T(1,n) = input('Ingrese el tiempo: ');
+    n = n+1;
+end
+
+%Tiempo promedio
+t = mean2(T);
+%Volumen
+V = input('Ingrese el volumen en ml: ')/1000000;
+%Caudal
+Q = V/t;
+%Velocidad
+v = Q/A;
+%Factor de Darcy
+f = (2*P*d)/(L*Rho*v^2);
+%Número de Reynolds
+Re = (Rho*v*d)/u;
+
+%Impresión de resultados
+disp('RESULTADOS')
+fprintf('El caudal es: %d \n',Q)
+fprintf('La velocidad es: %d \n',v)
+fprintf('El cambio de altura es: %d \n',z)
+fprintf('El cambio de presión es: %d \n',P)
+fprintf('El factor de Darcy es: %d \n', f)
+fprintf('El número de Reynolds es: %d \n',Re)
+
+%Asignación de datos a una matriz para mayor manejabilidad
+A = [1,6];
+A(1,1) = round(Q,10);
+A(1,2) = round(v,3);
+A(1,3) = round(z,3);
+A(1,4) = round(P,3);
+A(1,5) = round(f,3);
+A(1,6) = round(Re,3);
+
+%% Sección 2
+clear
+clc
+%Laboratorio nº9 - Pérdidas debido a fricción en tuberías
+Rho = 997; %Densidad a 25ºC
+u = 0.00089; %Viscocidad dinámica
+g = 9.81; %Gravedad
+L = 1; %Región de estudio
+d = 0.003175; %Diámetro de la tubería
+n = 1; %Contador
+A = (pi/4)*(d^2); %Área
+%Cambio de altura
+P = input('Ingrese la presión en psi: ')*(6.894757*1000);
+%Ingreso de las mediciones de tiempo
+T = [1,4];
+while n <= 4
+    T(1,n) = input('Ingrese el tiempo: ');
+    n = n+1;
+end
+
+%Tiempo promedio
+t = mean2(T);
+%Volumen
+V = input('Ingrese el volumen en ml: ')/1000000;
+%Caudal
+Q = V/t;
+%Velocidad
+v = Q/A;
+%Factor de Darcy
+f = (2*P*d)/(L*Rho*v^2);
+%Número de Reynolds
+Re = (Rho*v*d)/u;
+
+if Re > 4000
+    %Método numérico para encontrar el valor de f
+    e = input('Ingrese la rugosidad relativa: ');
+    a = 0;
+    b = 1;
+    iter = 100;
+        while n <= iter
+            fc = (a+b)/2;
+            fa = 1/(sqrt(fc));
+            fb = -2*log10((e/3.7)+(2.51/(Re*sqrt(fc))));
+            c = fb - fa;
+            if c > 0
+                b = fc;
+            elseif c < 0
+                a = fc;
+            end
+            n=n+1;
+        end
+end
+
+%Impresión de resultados
+disp('RESULTADOS')
+fprintf('El caudal es: %d \n',Q)
+fprintf('La velocidad es: %d \n',v)
+fprintf('El cambio de presión es: %d \n',P)
+fprintf('El factor de Darcy es: %d \n', f)
+fprintf('El número de Reynolds es: %d \n',Re)
+fprintf('El factor de Darcy iterado es: %d \n', fc)
+
+%Asignación de datos a una matriz para mayor manejabilidad
+A = [1,6];
+A(1,1) = round(Q,10);
+A(1,2) = round(v,3);
+A(1,3) = round(P,3);
+A(1,4) = round(f,3);
+A(1,5) = round(Re,3);
+A(1,6) = round(fc,3);
