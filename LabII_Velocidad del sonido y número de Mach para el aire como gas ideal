@@ -1,0 +1,211 @@
+clear
+clc
+
+%Coeficientes de la serie de Taylor
+ao=3.635888502; 
+a1=-1.360125*10^-3;
+a2=3.81443*10^-6;
+a3=-3.02383*10^-9;
+a4=1.03878*10^-12;
+a5=-1.32878*10^-16;
+R=287;%Constante general de los gases
+
+%Valores de referencia
+Tref=298.15;
+Pref=100000;
+href=298570;
+sref=5699.2;
+
+%Intervalo válido para las iteraciones
+Ta=200;
+Tb=2500;
+n=1; %Contador
+
+%Selección del caso a trabajar
+Op = {'Temperatura, presión y otra','Presión y velocidades','Presión, entalpía y otra','Entropía y velocidades','Entalpía, entropía y otra'};
+[indx,tf] = listdlg('PromptString',{'Seleccione un caso en'...
+    'específico'},'SelectionMode','single','ListString',Op);
+
+%Caso nº1 - Datos conocidos (Temperatura, Presión y alguna otra propiedad del sonido)
+if indx == 1
+    P = input('Ingrese el valor de presión: ');
+    T = input('Ingrese el valor de temperatura: ');
+    
+    syms t
+    fun1 = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+    h = href + integral(fun1,Tref,T);
+    fun2 = @(t) R*((ao*t.^-1)+(a1)+(a2*t)+(a3*t.^2)+(a4*t.^3)+(a5*t.^4));
+    s = sref + integral(fun2,Tref,T)- R*log(P/Pref);
+    
+    cp = R*(ao+a1*T+a2*T^2+a3*T^3+a4*T^4+a5*T^5);
+    k = cp/(cp-R);
+    
+    %Ingreso de propiedades relacionadas al sonido
+    Op1 = {'Velocidad local','Velocidad del sonido y velocidad local','Número de Mach'};
+    [indx1,tf] = listdlg('PromptString',{'¿Qué otra propiedad tiene?'},'SelectionMode','single','ListString',Op1);
+    
+    if indx1 == 1
+        V = input('Ingrese la velocidad local: ');
+        c = sqrt(k*R*T);
+        Ma = V/c;
+    elseif indx1 == 2
+        c = input('Ingrese la velocidad de sonido: ');
+        V = input('Ingrese la velocidad local: ');
+        Ma = V/c;
+    elseif indx1 == 3
+        Ma = input('Ingrese el número de Mach: ');
+        c = sqrt(k*R*T);
+        V = Ma*c;
+    end
+
+%%Caso nº2 - Datos conocidos (Presión y velocidades)
+elseif indx == 2
+    P = input('Ingrese el valor de presión: ');
+    V = input('Ingrese la velocidad local: ');
+    c = input('Ingrese la velocidad del sonido: ');
+    iter = input('Ingrese el número de iteraciones: ');
+    Ma = V/c;
+    
+    while n <= iter
+        T = (Ta+Tb)/2;
+        cp1 = R*(ao+a1*T+a2*T^2+a3*T^3+a4*T^4+a5*T^5);
+        k = cp1/(cp1-R);
+        ca = c;
+        cb = sqrt(k*R*T);
+        co = cb - ca;
+        if co > 0
+            Tb = T;
+        elseif co < 0
+            Ta = T;
+        end
+        n=n+1;
+    end
+    
+    syms t
+    fun1 = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+    h = href + integral(fun1,Tref,T);
+    fun2 = @(t) R*((ao*t.^-1)+(a1)+(a2*t)+(a3*t.^2)+(a4*t.^3)+(a5*t.^4));
+    s = sref + integral(fun2,Tref,T)- R*log(P/Pref);
+    
+%%Caso nº3 - Datos conocidos (Presión, entalpía y otra propiedad del sonido)
+elseif indx == 3
+    P = input('Ingrese el valor de presión: ');
+    h = input('Ingrese el valor de la entalpía: ');
+    iter = input('Ingrese el número máximo de iteraciones: ');
+    
+    while n <= iter
+    syms t
+    T = (Ta+Tb)/2;
+    fun = @(t) R*(ao+a1*t+a2*t.^2+a3*t.^3+a4*t.^4+a5*t.^5);
+    hb = href + integral(fun,Tref,T);
+    c = hb - h;
+        if c >= 0 
+            Tb = T;
+        elseif c < 0
+            Ta = T;
+        end
+    n=n+1;
+    end
+    cp = R*(ao+a1*T+a2*T^2+a3*T^3+a4*T^4+a5*T^5);
+    k = cp/(cp-R);
+    
+    syms t
+    fun1 = @(t) R*((ao*t.^-1)+(a1)+(a2*t)+(a3*t.^2)+(a4*t.^3)+(a5*t.^4));
+    s = sref + integral(fun1,Tref,T)- R*log(P/Pref);
+    
+    Op1 = {'Velocidad local','Velocidad del sonido y velocidad local','Número de Mach'};
+    [indx1,tf] = listdlg('PromptString',{'¿Qué otra propiedad tiene?'},'SelectionMode','single','ListString',Op1);
+    
+    if indx1 == 1
+        V = input('Ingrese la velocidad local: ');
+        c = sqrt(k*R*T);
+        Ma = V/c;
+    elseif indx1 == 2
+        c = input('Ingrese la velocidad de sonido: ');
+        V = input('Ingrese la velocidad local: ');
+        Ma = V/c;
+    elseif indx1 == 3
+        Ma = input('Ingrese el número de Mach: ');
+        c = sqrt(k*R*T);
+        V = Ma*c;
+    end
+    
+%%Caso nº4 - Datos conocidos (Entropía y velocidades)
+elseif indx == 4
+    s = input('Ingrese el valor de entropía: ');
+    V = input('Ingrese la velocidad local: ');
+    c = input('Ingrese la velocidad del sonido: ');
+    iter = input('Ingrese el número de iteraciones: ');
+    Ma = V/c;
+    
+    while n <= iter
+        T = (Ta+Tb)/2;
+        cp1 = R*(ao+a1*T+a2*T^2+a3*T^3+a4*T^4+a5*T^5);
+        k = cp1/(cp1-R);
+        ca = c;
+        cb = sqrt(k*R*T);
+        co = cb - ca;
+        if co > 0
+            Tb = T;
+        elseif co < 0
+            Ta = T;
+        end
+        n=n+1;
+    end
+    
+    syms t
+    fun1 = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+    h = href + (integral(fun1,Tref,T));
+    fun2 = @(t) R*((ao*t.^-1)+(a1)+(a2*t)+(a3*t.^2)+(a4*t.^3)+(a5*t.^4));
+    P = Pref*exp((-1/R)*(s-sref-integral(fun2,Tref,T)));
+    
+%%Caso nº5 - Datos conocidos (Entalpía, entropía y alguna otra propiedad del sonido)
+elseif indx == 5
+    h = input('Ingrese el valor de la entalpía: ');
+    s = input('Ingrese el valor de la entropía: ');
+    iter = input('Ingrese el número máximo de iteraciones: ');
+    while n<= iter
+    syms t
+    T = (Ta+Tb)/2;
+    fun = @(t) R*(ao+a1*t+a2*t.^2+a3*t.^3+a4*t.^4+a5*t.^5);
+    hb = href + integral(fun,Tref,T);
+    c = hb - h;
+        if c >= 0 
+            Tb = T;
+        elseif c <= 0
+            Ta = T;
+        end
+    n=n+1;
+    end
+    cp = R*(ao+a1*T+a2*T^2+a3*T^3+a4*T^4+a5*T^5);
+    syms t
+    fun2 = @(t) R*((ao*t.^-1)+(a1)+(a2*t)+(a3*t.^2)+(a4*t.^3)+(a5*t.^4));
+    P = Pref*exp((-1/R)*(s-sref-integral(fun2,Tref,T)));
+    k = abs(cp/(cp-R));
+    
+    Op1 = {'Velocidad local','Velocidad del sonido y velocidad local','Número de Mach'};
+    [indx1,tf] = listdlg('PromptString',{'¿Qué otra propiedad tiene?'},'SelectionMode','single','ListString',Op1);
+    
+    if indx1 == 1
+        V = input('Ingrese la velocidad local: ');
+        c = sqrt(k*R*T);
+        Ma = V/c;
+    elseif indx1 == 2
+        c = input('Ingrese la velocidad de sonido: ');
+        V = input('Ingrese la velocidad local: ');
+        Ma = V/c;
+    elseif indx1 == 3
+        Ma = input('Ingrese el número de Mach: ');
+        c = sqrt(k*R*T);
+        V = Ma*c;
+    end
+end
+
+%Impresión de resultados
+fprintf('La temperatura es: %d \n',T)
+fprintf('La presión es: %d \n',P)
+fprintf('La velocidad local es: %d \n',V)
+fprintf('La velocidad del sonido es: %d \n',c)
+fprintf('El número de Mach es: %d \n',Ma)
+fprintf('La entalpía es: %d \n',h)
+fprintf('La entropía es: %d \n',s)
