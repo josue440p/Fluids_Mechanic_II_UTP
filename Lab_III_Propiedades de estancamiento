@@ -1,0 +1,223 @@
+clear
+clc
+%Laboratorio nº3
+
+%%Coeficientes de la serie de Taylor
+ao=3.635888502; 
+a1=-1.360125*10^-3;
+a2=3.81443*10^-6;
+a3=-3.02383*10^-9;
+a4=1.03878*10^-12;
+a5=-1.32878*10^-16;
+
+R=287;%Constante general de los gases
+
+%%Valores de referencia
+Tref=298.15;
+Pref=100000;
+href=298570;
+sref=5699.2;
+
+%%Intervalo válido para las iteraciones
+Ta=-73.15;
+Tb=2226.85;
+n=1; %%Contador
+
+%Programación para gas ideal, cp variables
+Op = {'Gas ideal','Gas perfecto'};
+[indx,tf] = listdlg('PromptString',{'Tipo de gas'},'SelectionMode','single','ListString',Op);
+
+if indx == 1
+    Op1 = {'Temperatura, presión y número de Mach','Temperatura, presión y velocidad','Presión, velocidad y número de Mach'};
+    [indx1,tf] = listdlg('PromptString',{'¿Qué datos tiene?'},'SelectionMode','single','ListString',Op1);
+
+    if indx1 == 1
+    T = input('Ingrese el valor de temperatura: ');
+    P = input('Ingrese el valor de presión: ');
+    Ma = input('Ingrese el valor del número de Mach: ');
+    
+    %Determinación de propiedades
+    cp = R*(ao + a1*T + a2*T^2 + a3*T^3 + a4*T^4 + a5*T^5);
+    
+    k = cp/(cp - R);
+    c = sqrt(k*R*T);
+    
+    V = Ma*c;
+    syms t
+    fun = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+    h = href + integral(fun,Tref,T);
+    
+    %Determinación de propiedades de estancamiento
+    Po = P*(1+((k-1)/2)*Ma^2)^(k/(k-1));
+    To = T*(1+((k-1)/2)*Ma^2);
+    Do = (P/(R*T))*(1+((k-1)/2)*Ma^2)^(1/(k-1));
+    ho = h + (V^2/2);
+    
+    %Impresión de resultados
+    fprintf('La presión de estancamiento es: %d \n',Po)
+    fprintf('La temperatura de estancamiento es: %d \n',To)
+    fprintf('La densidad de estancamiento es: %d \n',Do)
+    fprintf('La entalpía de estancamiento es: %d \n',ho)
+    fprintf('La velocidad local es: %d \n',V)
+    
+    elseif indx1 == 2
+    T = input('Ingrese el valor de temperatura: ');
+    P = input('Ingrese el valor de presión: ');
+    V = input('Ingrese el valor de la velocidad local: '); 
+    
+    %Determinación de propiedades
+    cp = R*(ao + a1*T + a2*T^2 + a3*T^3 + a4*T^4 + a5*T^5);
+    
+    k = cp/(cp - R);
+    c = sqrt(k*R*T);
+    
+    Ma = V/c;
+    syms t
+    fun = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+    h = href + integral(fun,Tref,T);
+    
+    %Determinación de propiedades de estancamiento
+    Po = P*(1+((k-1)/2)*Ma^2)^(k/(k-1));
+    To = T*(1+((k-1)/2)*Ma^2);
+    Do = (P/(R*T))*(1+((k-1)/2)*Ma^2)^(1/(k-1));
+    ho = h + (V^2/2);
+    
+    %Impresión de resultados
+    fprintf('La presión de estancamiento es: %d \n',Po)
+    fprintf('La temperatura de estancamiento es: %d \n',To)
+    fprintf('La densidad de estancamiento es: %d \n',Do)
+    fprintf('La entalpía de estancamiento es: %d \n',ho)
+    fprintf('El número de Mach es: %d \n',Ma)
+    
+    elseif indx1 == 3
+    P = input('Ingrese el valor de presión: ');
+    V = input('Ingrese el valor de velocidad: ');
+    Ma = input('Ingrese el valor del número de Mach: '); 
+    
+    %Determinación de propiedades
+    c = V/Ma;
+    
+    iter = 100;
+    while n<= iter
+    T = (Ta+Tb)/2;
+    cp1 = R*(ao+a1*T+a2*T^2+a3*T^3+a4*T^4+a5*T^5);
+    k = cp1/(cp1-R);
+    ca = c;
+    cb = sqrt(k*R*T);
+    co = cb - ca;
+        if co >= 0 
+            Tb = T;
+        elseif co <= 0
+            Ta = T;
+        end
+    n=n+1;
+    end
+    
+    syms t
+    fun = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+    h = href + integral(fun,Tref,T);
+    
+    %Determinación de propiedades de estancamiento
+    Po = P*(1+((k-1)/2)*Ma^2)^(k/(k-1));
+    To = T*(1+((k-1)/2)*Ma^2);
+    Do = (P/(R*T))*(1+((k-1)/2)*Ma^2)^(1/(k-1));
+    ho = h + (V^2/2);
+    
+    %Impresión de resultados
+    fprintf('La temperatura local es: %d \n',T)
+    fprintf('La presión de estancamiento es: %d \n',Po)
+    fprintf('La temperatura de estancamiento es: %d \n',To)
+    fprintf('La densidad de estancamiento es: %d \n',Do)
+    fprintf('La entalpía de estancamiento es: %d \n',ho)
+    end
+    
+elseif indx == 2
+
+    Op2 = {'Temperatura, presión y número de Mach','Temperatura, presión y velocidad','Presión, velocidad y número de Mach'};
+    [indx2,tf] = listdlg('PromptString',{'¿Qué datos tiene?'},'SelectionMode','single','ListString',Op2);
+
+    if indx2 == 1
+    T = input('Ingrese el valor de temperatura: ');
+    P = input('Ingrese el valor de presión: ');
+    Ma = input('Ingrese el valor del número de Mach: ');
+    
+    %Determinación de propiedades
+    k = 1.4;
+    c = sqrt(k*R*T);
+    
+    V = Ma*c;
+    syms t
+    fun = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+    h = href + integral(fun,Tref,T);
+    
+    %Determinación de propiedades de estancamiento
+    Po = P*(1+((k-1)/2)*Ma^2)^(k/(k-1));
+    To = T*(1+((k-1)/2)*Ma^2);
+    Do = (P/(R*T))*(1+((k-1)/2)*Ma^2)^(1/(k-1));
+    ho = h + (V^2/2);
+    
+    %Impresión de resultados
+    fprintf('La presión de estancamiento es: %d \n',Po)
+    fprintf('La temperatura de estancamiento es: %d \n',To)
+    fprintf('La densidad de estancamiento es: %d \n',Do)
+    fprintf('La entalpía de estancamiento es: %d \n',ho)
+    fprintf('La velocidad local es: %d \n',V)
+    
+    elseif indx2 == 2
+    T = input('Ingrese el valor de temperatura: ');
+    P = input('Ingrese el valor de presión: ');
+    V = input('Ingrese el valor de la velocidad local: '); 
+    
+    %Determinación de propiedades
+    k = 1.4;
+    c = sqrt(k*R*T);
+    
+    Ma = V/c;
+    syms t
+    fun = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+    h = href + integral(fun,Tref,T);
+    
+    %Determinación de propiedades de estancamiento
+    Po = P*(1+((k-1)/2)*Ma^2)^(k/(k-1));
+    To = T*(1+((k-1)/2)*Ma^2);
+    Do = (P/(R*T))*(1+((k-1)/2)*Ma^2)^(1/(k-1));
+    ho = h + (V^2/2);
+    
+    %Impresión de resultados
+    fprintf('La presión de estancamiento es: %d \n',Po)
+    fprintf('La temperatura de estancamiento es: %d \n',To)
+    fprintf('La densidad de estancamiento es: %d \n',Do)
+    fprintf('La entalpía de estancamiento es: %d \n',ho)
+    fprintf('El número de Mach es: %d \n',Ma)
+    
+    elseif indx2 == 3
+    P = input('Ingrese el valor de presión: ');
+    V = input('Ingrese el valor de velocidad: ');
+    Ma = input('Ingrese el valor del número de Mach: '); 
+    
+    %Determinación de propiedades
+    c = V/Ma;
+    k = 1.4;
+    
+    T = (c^2)/(R*k);
+    
+    syms t
+    fun = @(t) R*((ao)+(a1*t)+(a2*t.^2)+(a3*t.^3)+(a4*t.^4)+(a5*t.^5));
+    h = href + integral(fun,Tref,T);
+    
+    %Determinación de propiedades de estancamiento
+    Po = P*(1+((k-1)/2)*Ma^2)^(k/(k-1));
+    To = T*(1+((k-1)/2)*Ma^2);
+    Do = (P/(R*T))*(1+((k-1)/2)*Ma^2)^(1/(k-1));
+    ho = h + (V^2/2);
+    
+    %Impresión de resultados
+    fprintf('La temperatura local es: %d \n',T)
+    fprintf('La presión de estancamiento es: %d \n',Po)
+    fprintf('La temperatura de estancamiento es: %d \n',To)
+    fprintf('La densidad de estancamiento es: %d \n',Do)
+    fprintf('La entalpía de estancamiento es: %d \n',ho)
+    end
+end
+
+
