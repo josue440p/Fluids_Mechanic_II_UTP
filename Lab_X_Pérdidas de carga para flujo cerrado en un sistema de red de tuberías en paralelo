@@ -1,0 +1,272 @@
+%Laboratorio nº10 / Perdidas en tuberías en paralelo
+
+%% Caso nº1 - Dos tramos
+clear
+clc
+
+e = 1.5*10^-4; %Rugosidad del los tramos
+Vt = 0.5; %Flujo volumétrico total
+n = 1; %Contador
+Rho = 996; %Densidad del fluido
+u = 7.98*10^-4; %Viscocidad dinámica del fluido
+g = 9.81; %Gravedad
+
+%Datos tramo 1
+V1 = Vt/1.5; %Aproximación inicial del caudal
+L1 = 20; %Longitud del tramo 1
+D1 = 0.1; %Diámetro del tramo 1
+kl1 = 1.06; %Coeficientes de pérdida por accesorios
+A1 = (pi/4)*(D1^2); %Área transversal del tramo 1
+
+%Datos tramo 2
+V2 = -1*(Vt - V1); %Aproximación incial del caudal
+L2 = 25; %Longitud del tramo 2
+D2 = 0.1; %Diámetro del tramo 2
+kl2 = 1.55; %Coeficientes de pérdida por accesorios
+A2 = (pi/4)*(D2^2); %Área transversal del tramo 1
+
+iter = 100; %Número de iteraciones
+
+while n < iter
+    %Cálculos tramo 1
+    ed1 = e/D1; %Rugosidad relativa
+    v1 = V1/A1; %Velocidad del tramo 1
+    Re1 = (Rho*v1*D1)/u; %Número de Reynolds del tramo 1
+    f1 = 0.25/((log10((ed1/3.7)+(5.74/(Re1^0.9))))^2); %Factor de fricción de Darcy del tramos 1
+    hl1 = ((8/((pi^2)*(D1^4)*g))*(f1*(L1/D1)+kl1))*(V1)^2;
+    
+    %Cálculos tramo 2
+    ed2 = e/D2; %Rugosidad relativa
+    v2 = abs(V2/A2); %Velocidad del tramo 1
+    Re2 = (Rho*v2*D2)/u; %Número de Reynolds del tramo 1
+    f2 = 0.25/((log10((ed2/3.7)+(5.74/(Re2^0.9))))^2); %Factor de fricción de Darcy del tramos 1
+    hl2 = -1*(((8/((pi^2)*(D2^4)*g))*(f2*(L2/D2)+kl2))*(V2)^2);
+    
+    hl = hl1 + hl2; %Sumatoria de pérdidas
+    deltaV = hl/(2*((hl1/V1)+(hl2/V2))); %Diferencia de flujo volumétricos
+    
+    %Corrección de flujos volumétricos
+    V1 = V1 - deltaV; %Correción del flujo volumétrico 1
+    V2 = V2 - deltaV; %Correción del flujo volumétrico 2
+    
+    n = n + 1;
+end
+Vfinal = abs(V1)+abs(V2); 
+
+disp('RESULTADOS')
+fprintf('El flujo volumétrico total es: %d \n',Vfinal)
+fprintf('El flujo volumétrico 1 es: %d \n',abs(V1))
+fprintf('El flujo volumétrico 2 es: %d \n',abs(V2))
+fprintf('Las pérdidas en el tramo 1 son: %d \n',abs(hl1))
+fprintf('Las pérdidas en el tramo 2 son: %d \n',abs(hl2))
+%% Caso nº2 - tres tramos
+clear
+clc
+
+e = 1.5*10^-4; %Rugosidad del los tramos
+Vt = 0.75; %Flujo volumétrico total
+n = 1; %Contador
+Rho = 996; %Densidad del fluido
+u = 7.98*10^-4; %Viscocidad dinámica del fluido
+g = 9.81; %Gravedad
+
+%Datos tramo 1
+V1 = Vt/4; %Aproximación inicial del caudal
+L1 = 40.2; %Longitud del tramo 1
+D1 = 0.1352; %Diámetro del tramo 1
+kl1 = 1.9; %Coeficientes de pérdida por accesorios
+A1 = (pi/4)*(D1^2); %Área transversal del tramo 1
+
+%Datos tramo 2
+V2 = -1*(Vt/2); %Aproximación inicial del caudal
+L2 = 27.5; %Longitud del tramo 2
+D2 = 0.1126; %Diámetro del tramo 2
+kl2 = 1.55; %Coeficientes de pérdida por accesorios
+A2 = (pi/4)*(D2^2); %Área transversal del tramo 1
+
+%Datos tramo 3
+V3 = -1*(Vt/4); %Aproximación inicial del caudal
+L3 = 30.8; %Longitud del tramo 3
+D3 = 0.1356; %Diámetro del tramo 3
+kl3 = 1.72; %Coeficientes de pérdida por accesorios
+A3 = (pi/4)*(D3^2); %Área transversal del tramo 3
+
+iter = 100; %Número de iteraciones
+
+while n < iter
+    %Circuito 1
+    
+    %Cálculos tramo 1
+    ed1 = e/D1; %Rugosidad relativa
+    v1 = V1/A1; %Velocidad del tramo 1
+    Re1 = (Rho*v1*D1)/u; %Número de Reynolds del tramo 1
+    f1 = 0.25/((log10((ed1/3.7)+(5.74/(Re1^0.9))))^2); %Factor de fricción de Darcy del tramos 1
+    hl1 = ((8/((pi^2)*(D1^4)*g))*(f1*(L1/D1)+kl1))*(V1)^2;
+    
+    %Cálculos tramo 2
+    ed2 = e/D2; %Rugosidad relativa
+    v2 = abs(V2/A2); %Velocidad del tramo 1
+    Re2 = (Rho*v2*D2)/u; %Número de Reynolds del tramo 1
+    f2 = 0.25/((log10((ed2/3.7)+(5.74/(Re2^0.9))))^2); %Factor de fricción de Darcy del tramos 1
+    hl2 = -1*(((8/((pi^2)*(D2^4)*g))*(f2*(L2/D2)+kl2))*(V2)^2);
+    
+    hl = hl1 + hl2; %Sumatoria de pérdidas
+    deltaV = hl/(2*((hl1/V1)+(hl2/V2))); %Diferencia de flujo volumétricos
+    
+    %Circuito 2
+    
+    %Cálculos tramo 3
+    ed3 = e/D3; %Rugosidad relativa
+    v3 = abs(V3/A3); %Velocidad del tramo 1
+    Re3 = (Rho*v3*D3)/u; %Número de Reynolds del tramo 1
+    f3 = 0.25/((log10((ed3/3.7)+(5.74/(Re3^0.9))))^2); %Factor de fricción de Darcy del tramos 1
+    hl3 = -1*(((8/((pi^2)*(D3^4)*g))*(f3*(L3/D3)+kl3))*(V3)^2);
+    
+    hll = abs(hl2) + hl3; %Sumatoria de pérdidas
+    deltaV1 = hll/(2*((abs(hl2/V2))+(hl3/V3))); %Diferencia de flujo volumétricos
+    
+    %Corrección de flujo volumétricos
+    V1 = V1 - deltaV; %Correción del flujo volumétrico 1
+    V2 = V2 - deltaV + deltaV1; %Correción del flujo volumétrico 2
+    V3 = V3 - deltaV1; %Correción del flujo volumétrico 3
+    
+    n = n + 1;
+end
+Vfinal = abs(V1)+abs(V2)+abs(V3); 
+
+disp('RESULTADOS')
+fprintf('El flujo volumétrico total es: %d \n',Vfinal)
+fprintf('El flujo volumétrico 1 es: %d \n',abs(V1))
+fprintf('El flujo volumétrico 2 es: %d \n',abs(V2))
+fprintf('El flujo volumétrico 3 es: %d \n',abs(V3))
+fprintf('Las pérdidas en el tramo 1 son: %d \n',abs(hl1))
+fprintf('Las pérdidas en el tramo 2 son: %d \n',abs(hl2))
+fprintf('Las pérdidas en el tramo 3 son: %d \n',abs(hl3))
+
+%% Caso nº3 - cinco tramos
+clear
+clc
+
+e = 1.5*10^-4; %Rugosidad del los tramos
+Vt = 1.5; %Flujo volumétrico total
+n = 1; %Contador
+Rho = 996; %Densidad del fluido
+u = 7.98*10^-4; %Viscocidad dinámica del fluido
+g = 9.81; %Gravedad
+
+%Datos tramo 1
+V1 = Vt/8; %Aproximación inicial del caudal
+L1 = 55; %Longitud del tramo 1
+D1 = 0.1095; %Diámetro del tramo 1
+kl1 = 18; %Coeficientes de pérdida por accesorios
+A1 = (pi/4)*(D1^2); %Área transversal del tramo 1
+
+%Datos tramo 2
+V2 = -1*(Vt/8); %Aproximación inicial del caudal
+L2 = 55; %Longitud del tramo 2
+D2 = 0.1095; %Diámetro del tramo 2
+kl2 = 18; %Coeficientes de pérdida por accesorios
+A2 = (pi/4)*(D2^2); %Área transversal del tramo 2
+
+%Datos tramo 3
+V3 = -1*(Vt/8); %Aproximación inicial del caudal
+L3 = 35; %Longitud del tramo 3
+D3 = 0.0975; %Diámetro del tramo 3
+kl3 = 1.5; %Coeficientes de pérdida por accesorios
+A3 = (pi/4)*(D3^2); %Área transversal del tramo 3
+
+%Datos tramo 4
+V4 = -1*(Vt/2); %Aproximación inicial del caudal
+L4 = 40; %Longitud del tramo 4
+D4 = 0.1305; %Diámetro del tramo 4
+kl4 = 12; %Coeficientes de pérdida por accesorios
+A4 = (pi/4)*(D4^2); %Área transversal del tramo 4
+
+%Datos tramo 5
+V5 = -1*(Vt/8); %Aproximación inicial del caudal
+L5 = 40; %Longitud del tramo 5
+D5 = 0.1305; %Diámetro del tramo 5
+kl5 = 12; %Coeficientes de pérdida por accesorios
+A5 = (pi/4)*(D5^2); %Área transversal del tramo 5
+
+iter = 100; %Número de iteraciones
+
+while n < iter
+    %Circuito 1
+    
+    %Cálculos tramo 1
+    ed1 = e/D1; %Rugosidad relativa
+    v1 = V1/A1; %Velocidad del tramo 1
+    Re1 = (Rho*v1*D1)/u; %Número de Reynolds del tramo 1
+    f1 = 0.25/((log10((ed1/3.7)+(5.74/(Re1^0.9))))^2); %Factor de fricción de Darcy del tramos 1
+    hl1 = ((8/((pi^2)*(D1^4)*g))*(f1*(L1/D1)+kl1))*(V1)^2;
+    
+    %Cálculos tramo 2
+    ed2 = e/D2; %Rugosidad relativa
+    v2 = abs(V2/A2); %Velocidad del tramo 1
+    Re2 = (Rho*v2*D2)/u; %Número de Reynolds del tramo 1
+    f2 = 0.25/((log10((ed2/3.7)+(5.74/(Re2^0.9))))^2); %Factor de fricción de Darcy del tramos 1
+    hl2 = -1*(((8/((pi^2)*(D2^4)*g))*(f2*(L2/D2)+kl2))*(V2)^2);
+    
+    hl = hl1 + hl2; %Sumatoria de pérdidas
+    deltaV = hl/(2*((hl1/V1)+(hl2/V2))); %Diferencia de flujo volumétricos
+    
+    %Circuito 2
+    
+    %Cálculos tramo 3
+    ed3 = e/D3; %Rugosidad relativa
+    v3 = abs(V3/A3); %Velocidad del tramo 1
+    Re3 = (Rho*v3*D3)/u; %Número de Reynolds del tramo 1
+    f3 = 0.25/((log10((ed3/3.7)+(5.74/(Re3^0.9))))^2); %Factor de fricción de Darcy del tramos 1
+    hl3 = -1*(((8/((pi^2)*(D3^4)*g))*(f3*(L3/D3)+kl3))*(V3)^2);
+    
+    hla = abs(hl2) + hl3; %Sumatoria de pérdidas
+    deltaVa = hla/(2*((abs(hl2/V2))+(hl3/V3))); %Diferencia de flujo volumétricos
+    
+    %Circuito 3
+    
+    %Cálculos tramo 4
+    ed4 = e/D4; %Rugosidad relativa
+    v4 = abs(V4/A4); %Velocidad del tramo 1
+    Re4 = (Rho*v4*D4)/u; %Número de Reynolds del tramo 1
+    f4 = 0.25/((log10((ed4/3.7)+(5.74/(Re4^0.9))))^2); %Factor de fricción de Darcy del tramos 1
+    hl4 = -1*(((8/((pi^2)*(D4^4)*g))*(f4*(L4/D4)+kl4))*(V4)^2);
+    
+    hlb = abs(hl3) + hl4; %Sumatoria de pérdidas
+    deltaVb = hlb/(2*((abs(hl3/V3))+(hl4/V4))); %Diferencia de flujo volumétricos
+    
+    %Circuito 4
+    
+    %Cálculos tramo 5
+    ed5 = e/D5; %Rugosidad relativa
+    v5 = abs(V5/A5); %Velocidad del tramo 1
+    Re5 = (Rho*v5*D5)/u; %Número de Reynolds del tramo 1
+    f5 = 0.25/((log10((ed5/3.7)+(5.74/(Re5^0.9))))^2); %Factor de fricción de Darcy del tramos 1
+    hl5 = -1*(((8/((pi^2)*(D5^4)*g))*(f5*(L5/D5)+kl5))*(V5)^2);
+    
+    hlc = abs(hl4) + hl5; %Sumatoria de pérdidas
+    deltaVc = hlc/(2*((abs(hl4/V4))+(hl5/V5))); %Diferencia de flujo volumétricos
+    
+    %Corrección de flujo volumétricos
+    V1 = V1 - deltaV; %Correción del flujo volumétrico 1
+    V2 = V2 - deltaV + deltaVa; %Correción del flujo volumétrico 2
+    V3 = V3 - deltaVa + deltaVb; %Correción del flujo volumétrico 3
+    V4 = V4 - deltaVb + deltaVc; %Correción del flujo volumétrico 4
+    V5 = V5 - deltaVc; %Correción del flujo volumétrico 5
+    n = n + 1;
+end
+
+Vfinal = abs(V1)+abs(V2)+abs(V3)+abs(V4)+abs(V5); 
+
+disp('RESULTADOS')
+fprintf('El flujo volumétrico total es: %d \n',Vfinal)
+fprintf('El flujo volumétrico 1 es: %d \n',abs(V1))
+fprintf('El flujo volumétrico 2 es: %d \n',abs(V2))
+fprintf('El flujo volumétrico 3 es: %d \n',abs(V3))
+fprintf('El flujo volumétrico 4 es: %d \n',abs(V4))
+fprintf('El flujo volumétrico 5 es: %d \n',abs(V5))
+fprintf('Las pérdidas en el tramo 1 son: %d \n',abs(hl1))
+fprintf('Las pérdidas en el tramo 2 son: %d \n',abs(hl2))
+fprintf('Las pérdidas en el tramo 3 son: %d \n',abs(hl3))
+fprintf('Las pérdidas en el tramo 4 son: %d \n',abs(hl4))
+fprintf('Las pérdidas en el tramo 5 son: %d \n',abs(hl5))
