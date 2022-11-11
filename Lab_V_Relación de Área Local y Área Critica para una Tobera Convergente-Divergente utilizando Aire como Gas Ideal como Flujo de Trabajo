@@ -1,0 +1,114 @@
+clear
+clc
+%Laboratorio nº4
+
+%Coeficientes de la serie de Taylor
+ao=3.635888502; 
+a1=-1.360125*10^-3;
+a2=3.81443*10^-6;
+a3=-3.02383*10^-9;
+a4=1.03878*10^-12;
+a5=-1.32878*10^-16;
+
+R=287;%Constante general de los gases
+
+%%Valores de referencia
+Tref=298.15;
+Pref=100000;
+href=298570;
+sref=5699.2;
+
+%Intervalo válido para las iteraciones
+Ta=200;
+Tb=2500;
+n=1; %Contador
+n1=1;%Contador
+
+%Ingreso de loas variables solictadas
+To = input('Ingrese el valor de la temperatura de estancamiento: ');
+Po = input('Ingrese el valor de la presión de estancamiento: ');
+Ma = input('Ingrese el número de Mach del punto: ');
+
+%Método numérico para encontrar el valor de k y T*
+iter = 100;
+    while n <= iter
+        Tc = (Ta+Tb)/2;
+        cpc = R*(ao+a1*Tc+a2*Tc^2+a3*Tc^3+a4*Tc^4+a5*Tc^5);
+        kc = cpc/(cpc - R); 
+        Td = Tc*(1+((kc-1)/2));
+        co = Td - To;
+        if co > 0
+            Tb = Tc;
+        elseif co < 0
+            Ta = Tc;
+        end
+        n=n+1;
+    end
+ 
+ %Cálculo de la presión crítica
+ Pc = Po/((1+((kc-1)/2))^(kc/(kc-1)));
+ 
+ %Cálculo de la densidad de estancamiento y la densidad crítica
+ Rho = Po/(R*To);
+ Rhoc = Rho/((1+((kc-1)/2))^(kc/(kc-1)));
+ 
+ %Cálculo de la velocidad crítica
+ Vc = sqrt(kc*R*Tc);
+ 
+ %Reasignación de valores para el intervalo de iteración de temperaturas
+ Tx=200;
+ Ty=2500;
+ 
+ %Método numérico para encontrar la k y la Temperatura local
+     while n1 <= iter
+        Ti= (Tx+Ty)/2;
+        cpi = R*(ao+a1*Ti+a2*Ti^2+a3*Ti^3+a4*Ti^4+a5*Ti^5);
+        ki = cpi/(cpi - R); 
+        Te = Ti*(1+((ki-1)/2)*Ma^2);
+        co = Te - To;
+        if co > 0
+            Ty = Ti;
+        elseif co < 0
+            Tx = Ti;
+        end
+        n1=n1+1;
+     end
+     
+%Cálculo de la presión local
+Pi = Po/((1+((ki-1)/2)*Ma^2)^(ki/(ki-1)));
+
+%Cálculo de la densidad local
+Rhoi = Rho/((1+((ki-1)/2)*Ma^2)^(ki/(ki-1)));
+
+%Cálculo de las velocidad local y la velocidad del sonido
+ci = sqrt(ki*R*Ti);
+Vi = ci*Ma;
+
+%Cálculo de la relación entre el área local y crítica
+AiAc = (Rhoc*Vc)/(Rhoi*Vi);
+ 
+%Impresión de resultados
+disp('RESULTADOS')
+fprintf('La temperatura crítica es: %d \n',Tc)
+fprintf('La presión crítica: %d \n',Pc)
+fprintf('La densidad crítica es: %d \n',Rhoc)
+fprintf('La velocidad crítica es: %d \n',Vc)
+fprintf('La temperatura local es: %d \n',Ti)
+fprintf('La presión local es: %d \n',Pi)
+fprintf('La densidad local es: %d \n',Rhoi)
+fprintf('La velocidad del sonido local es: %d \n',ci)
+fprintf('La velocidad local es: %d \n',Vi)
+fprintf('La relación Ai/A* es: %d \n',AiAc)
+
+%Asignación de datos a una matriz para mayor manejabilidad
+A = [1,10];
+A(1,1) = round(Tc,3);
+A(1,2) = round(Pc,3);
+A(1,3) = round(Rhoc,3);
+A(1,4) = round(Vc,3);
+A(1,5) = round(Ti,3);
+A(1,6) = round(Pi,3);
+A(1,7) = round(Rhoi,3);
+A(1,8) = round(ci,3);
+A(1,9) = round(Vi,3);
+A(1,10) = round(AiAc,3);
